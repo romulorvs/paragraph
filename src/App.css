@@ -1,0 +1,77 @@
+::-webkit-scrollbar {
+    width: 10px;
+    background: #d9d9d9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgb(177, 177, 177);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.tab-titles-wrapper{
+    display: flex;
+    overflow: hidden;
+    width: 100%;
+    margin-bottom: 40px;
+    position: relative;
+    height: 60px;
+}
+
+ul.tab-titles{
+    display: flex;
+    align-items: flex-end;
+    height: 100%;
+    position: absolute;
+    transition: left 0.3s;
+}
+
+ul.paragraphs{
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+    max-width: 900px;
+    width: 100%;
+}
+
+.tab-title{
+    border: 0;
+    font-size: 4.2rem;
+    font-weight: 700;
+    outline: none;
+    padding-left: 20px;
+    color: #b5b5b5;
+    margin-right: 40px;
+    transition: font-size 0.3s, color 0.3s;
+    background: none;
+}
+
+.tab-title.current{
+    color: black;
+}
+
+.tab-title:not(.current){
+    cursor: pointer;
+}
+
+span.tab-title-ref{
+    position: fixed;
+    top: -100px;
+    left: 0;
+    user-select: none;
+    font-size: 4.8rem;
+    font-weight: 700;
+    padding-left: 20px;
+    white-space: pre;
+}
+
+.logo{
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    bottom: 20px;
+    left: 20px;
+    object-fit: contain;
+}

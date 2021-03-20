@@ -1,0 +1,57 @@
+.paragraph{
+    width: 100%;
+    min-height: 1.8rem;
+    font-size: 1.8rem;
+    font-weight: 300;
+    padding: 8px 0 10px 20px;
+    border: 0;
+    resize: none;
+    outline: none;
+    color: rgb(61, 61, 61);
+    background: none;
+}
+
+.paragraph:focus{
+    box-shadow: -2px 0 0 0 rgb(200, 200, 200);
+}
+
+.paragraph:hover:not(:focus){
+    box-shadow: -2px 0 0 0 rgb(226, 226, 226);
+}
+
+.paragraph.header1{
+    font-size: 3.2rem;
+    font-weight: 700;
+}
+
+.paragraph.header2{
+    font-size: 2.7rem;
+    font-weight: 700;
+}
+
+.paragraph.header3{
+    font-size: 2.2rem;
+    font-weight: 700;
+}
+
+.paragraph_container{
+    display: flex;
+}
+
+.paragraph_container.line_through{
+    position: relative;
+}
+
+.paragraph_container.line_through:after{
+    content: '';
+    position: absolute;
+    top: calc(50% - 1px);
+    left: 20px;
+    right: 10px;
+    height: 2px;
+    background-color: rgba(61, 61, 61, 0.2);
+}
+
+.paragraph_container.line_through .paragraph:not(.focusing){
+    color: transparent;
+}
