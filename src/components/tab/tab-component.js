@@ -12,23 +12,30 @@ import DeleteButton from '../delete-button';
 const placeHolder = 'Título';
 const minTabWidth = 30; // pixels
 
-const debounceUpdateTabTitle = configDebounce();
-const debounceUpdateTabWidth = configDebounce();
-
 export default function Tab({ tab, isCurrentTab, onClick, nextTabId, previousTabId }) {
   const dispatch = useDispatch();
 
   const [_title, _setTitle] = useState(tab.title);
-  const [_titleWidth, _setTitleWidth] = useState(tab.title);
+  const [_titleWidth, _setTitleWidth] = useState(tab.titleWidth);
 
   const tabTitleRef = useRef(null);
   const wrapperRef = useRef(null);
+  const debounceUpdateTabTitle = useRef(configDebounce());
+  const debounceUpdateTabWidth = useRef(configDebounce());
   const currentClassName = isCurrentTab ? 'current' : '';
+
+  // keeping local state synchronized with redux state when chrome tab is not active
+  useEffect(() => {
+    if (!document.hasFocus()) {
+      _setTitle(tab.title);
+      _setTitleWidth(tab.titleWidth);
+    }
+  }, [tab.title, tab.titleWidth]);
 
   function handleTabTitleChange(e) {
     _setTitle(e.target.value);
 
-    debounceUpdateTabTitle(() =>
+    debounceUpdateTabTitle.current(() =>
       dispatch(
         updateTabTitle({
           tabId: tab.id,
@@ -78,7 +85,7 @@ export default function Tab({ tab, isCurrentTab, onClick, nextTabId, previousTab
     if (!tabTitleRef.current) return;
     _setTitleWidth(tabTitleRef.current.clientWidth);
 
-    debounceUpdateTabWidth(() =>
+    debounceUpdateTabWidth.current(() =>
       dispatch(
         updateTabWidth({
           tabId: tab.id,
@@ -90,8 +97,8 @@ export default function Tab({ tab, isCurrentTab, onClick, nextTabId, previousTab
 
   useEffect(() => {
     return () => {
-      debounceUpdateTabTitle.clear();
-      debounceUpdateTabWidth.clear();
+      debounceUpdateTabTitle.current.clear();
+      debounceUpdateTabWidth.current.clear();
     };
   }, []);
 

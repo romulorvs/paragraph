@@ -13,7 +13,6 @@ import { configDebounce } from '../../utils';
 import './paragraph.css';
 
 const placeHolder = 'Escreva algo...';
-const debounceUpdateParagraph = configDebounce();
 
 export default function Paragraph({
   paragraph,
@@ -34,6 +33,16 @@ export default function Paragraph({
   const isKeyDown = useRef(false);
   const currentCursorPos = useRef(-1);
   const moveToAddedParagraph = useRef(false);
+  const debounceUpdateParagraph = useRef(configDebounce());
+
+  // keeping local state synchronized with redux state when chrome tab is not active
+  useEffect(() => {
+    console.log('passou 1');
+    if (!document.hasFocus()) {
+      console.log('passou 2');
+      _setParagraph(paragraph);
+    }
+  }, [paragraph]);
 
   useEffect(() => {
     _setParagraph(paragraph);
@@ -85,7 +94,7 @@ export default function Paragraph({
         ...newParagraph,
       });
 
-      debounceUpdateParagraph(() =>
+      debounceUpdateParagraph.current(() =>
         dispatch(
           updateParagraph({
             tabId,
@@ -106,7 +115,7 @@ export default function Paragraph({
       ...newParagraph,
     });
 
-    debounceUpdateParagraph(() =>
+    debounceUpdateParagraph.current(() =>
       dispatch(
         updateParagraph({
           tabId,
@@ -293,7 +302,7 @@ export default function Paragraph({
 
   useEffect(() => {
     return () => {
-      debounceUpdateParagraph.clear();
+      debounceUpdateParagraph.current.clear();
     };
   }, []);
 

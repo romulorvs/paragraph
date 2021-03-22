@@ -9,11 +9,11 @@ html {
 }
 
 body{
-  background-image: url('../src/assets/wallpaper.png');
   background-size: cover;
   background-attachment: fixed;
   padding-top: 100px;
   padding-bottom: 40px;
+  background-color: #2f2f2f;
 }
 
 body, * {

@@ -4,14 +4,14 @@
     font-weight: 700;
     outline: none;
     padding-left: 20px;
-    color: #b5b5b5;
+    color: #838383;
     margin-right: 40px;
     transition: font-size 0.3s, color 0.3s;
     background: none;
 }
 
 .tab-title.current{
-    color: black;
+    color: rgb(255, 255, 255);
 }
 
 .tab-title:not(.current){

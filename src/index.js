@@ -13,19 +13,19 @@ const storedState = ifff(localStorage.getItem('@paragraph:data'), r => JSON.pars
 
 const store = configStore(storedState);
 
-store.dispatch({
-  type: 'RESET',
-});
+// store.dispatch({
+//   type: 'RESET',
+// });
 
 store.subscribe(() => {
   localStorage.setItem('@paragraph:data', JSON.stringify(store.getState()));
 });
 
-// setInterval(() => {
-//   if (!document.hasFocus()) {
-//     store.dispatch(updateState());
-//   }
-// }, 400);
+setInterval(() => {
+  if (!document.hasFocus()) {
+    store.dispatch(updateState());
+  }
+}, 400);
 
 ReactDOM.render(
   <React.StrictMode>
