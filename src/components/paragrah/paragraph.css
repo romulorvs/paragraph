@@ -9,6 +9,7 @@
     outline: none;
     color: rgb(61, 61, 61);
     background: none;
+    overflow-y: hidden;
 }
 
 .paragraph:focus{

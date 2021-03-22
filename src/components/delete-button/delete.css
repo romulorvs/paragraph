@@ -1,0 +1,54 @@
+.delete-btn{
+  top: 20px;
+  left: 20px;
+  font-weight: 400;
+  border-radius: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+  color: white;
+  border: 1px solid transparent;
+  fill: rgb(200, 200, 200);
+  margin-top: 2px;
+}
+.delete-btn svg{
+  width: 20px;
+  height: 20px;
+  border-radius: 30px;
+}
+.delete-btn:focus-visible svg{
+  box-shadow: 0 0 0 3px rgb(180, 180, 180);
+}
+.delete-btn:focus{
+  fill: rgb(200, 200, 200);
+}
+.delete-btn:hover{
+  fill: rgb(136, 136, 136);
+}
+.delete-btn:active, .delete-btn:active:hover{
+  border: none;
+  fill: rgb(59, 59, 59);
+  border: 1px solid transparent;
+}
+
+.delete-btn.pending{
+  fill: rgb(255, 142, 142);
+}
+.delete-btn.pending:focus{
+  fill: rgb(255, 142, 142);
+}
+.delete-btn.pending:focus-visible{
+  fill: rgb(231, 94, 94);
+}
+.delete-btn.pending:hover{
+  fill: rgb(231, 94, 94);
+}
+.delete-btn.pending:active, .delete-btn.pending:active:hover{
+  fill: rgb(189, 43, 43);
+}
+
+.delete-btn.pending svg{
+  box-shadow: 0 0 0 3px rgb(255, 184, 184);
+}

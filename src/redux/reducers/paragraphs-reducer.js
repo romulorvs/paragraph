@@ -1,40 +1,114 @@
 /* eslint-disable no-case-declarations */
+import { v4 as uuid } from 'uuid';
 
 import { ifff } from '../../utils';
 
-const BLANK_PARAGRAPH = {
-  text: '',
-  editingText: '',
-  coverText: '',
-  rows: 1,
-};
-const INITIAL_STATE = {
-  tabs: [
-    {
-      title: 'Hoje',
-      titleWidth: 30,
-      paragraphs: [BLANK_PARAGRAPH],
-      paragraphsLength: 1,
-    },
-    {
-      title: 'novo...',
-      titleWidth: 167,
-      paragraphs: [BLANK_PARAGRAPH],
-      paragraphsLength: 1,
-    },
-  ],
-  version: 1,
-};
+function getBlankParagraph() {
+  const BLANK_PARAGRAPH = {
+    id: uuid(),
+    text: '',
+    editingText: '',
+    coverText: '',
+  };
+  return BLANK_PARAGRAPH;
+}
 
-export default (state = INITIAL_STATE, action) => {
-  const { type, payload } = action;
+function getBlankTab() {
+  const BLANK_TAB = {
+    id: uuid(),
+    title: 'novo...',
+    titleWidth: 142,
+    paragraphs: [getBlankParagraph()],
+  };
+  return BLANK_TAB;
+}
 
-  if (typeof type !== 'string' || typeof payload === 'undefined') {
-    return state;
-  }
+function getInitialState() {
+  const INITIAL_STATE = {
+    tabs: [
+      {
+        id: uuid(),
+        title: '📝 Hoje',
+        titleWidth: 141,
+        paragraphs: [
+          {
+            id: uuid(),
+            text: 'Comece escrevendo algo neste parágrafo ou abaixo.',
+            editingText: '###Comece escrevendo algo neste parágrafo ou abaixo.',
+            coverText: '',
+          },
+          getBlankParagraph(),
+        ],
+      },
+      {
+        id: uuid(),
+        title: '💡 Dicas',
+        titleWidth: 155,
+        paragraphs: [
+          {
+            id: uuid(),
+            text: ' #comece o texto com # para fonte extra-grande',
+            editingText: '# #comece o texto com # para fonte extra-grande',
+            coverText: '',
+          },
+          {
+            id: uuid(),
+            text: ' ##comece o texto com ## para fonte grande',
+            editingText: '## ##comece o texto com ## para fonte grande',
+            coverText: '',
+          },
+          {
+            id: uuid(),
+            text: ' ###comece o texto com ### para fonte média',
+            editingText: '### ###comece o texto com ### para fonte média',
+            coverText: '',
+          },
+          {
+            id: uuid(),
+            text: '---',
+            editingText: '---',
+            coverText: '---',
+          },
+          {
+            id: uuid(),
+            text: ' ---para criar uma linha divisória, como acima,  comece o texto com ---',
+            editingText: ' ---para criar uma linha divisória, como acima,  comece o texto com ---',
+            coverText: '',
+          },
+          {
+            id: uuid(),
+            text: 'Dicas do texto:',
+            editingText: '###Dicas do texto:',
+            coverText: '',
+          },
+          {
+            id: uuid(),
+            text:
+              'Aperte Enter para criar um novo parágrafo e Shift+Enter para criar uma nova linha no mesmo parágrafo.',
+            editingText:
+              'Aperte Enter para criar um novo parágrafo e Shift+Enter para criar uma nova linha no mesmo parágrafo.',
+            coverText: '',
+          },
+          getBlankParagraph(),
+        ],
+      },
+      getBlankTab(),
+    ],
+    version: 1,
+  };
 
-  const { tabIndex, paragraphIndex, after, newParagraph, title, titleWidth } = payload;
+  return INITIAL_STATE;
+}
+
+export default (state = getInitialState(), action) => {
+  const { type } = action;
+
+  if (typeof type !== 'string') return state;
+
+  const { tabId, paragraphId, afterId, newParagraph, title, titleWidth } = action.payload || {};
   const tabs = [...state.tabs];
+  let tabIndex;
+  let paragraphIndex;
 
   const documentHasFocus = document.hasFocus();
 
@@ -42,12 +116,18 @@ export default (state = INITIAL_STATE, action) => {
     case 'ADD_PARAGRAPH':
       if (!documentHasFocus) return state;
 
-      if (after !== null && after >= 0) {
-        tabs[tabIndex].paragraphs.splice(after + 1, 0, BLANK_PARAGRAPH);
+      tabIndex = tabs.findIndex(tab => tab.id === tabId);
+      if (tabIndex < 0) return state;
+
+      const afterIndex = afterId
+        ? tabs[tabIndex].paragraphs.findIndex(paragraph => paragraph.id === afterId)
+        : -1;
+
+      if (afterIndex >= 0) {
+        tabs[tabIndex].paragraphs.splice(afterIndex + 1, 0, getBlankParagraph());
       } else {
-        tabs[tabIndex].paragraphs.push(BLANK_PARAGRAPH);
+        tabs[tabIndex].paragraphs.push(getBlankParagraph());
       }
-      tabs[tabIndex].paragraphsLength = tabs[tabIndex].paragraphs.length;
 
       return {
         ...state,
@@ -57,13 +137,16 @@ export default (state = INITIAL_STATE, action) => {
 
     case 'REMOVE_PARAGRAPH':
       if (!documentHasFocus) return state;
-      const existingParagraphIndex = tabs[tabIndex].paragraphs.findIndex(
-        (p, pIndex) => pIndex === paragraphIndex,
-      );
-      if (existingParagraphIndex === -1) return state;
 
-      tabs[tabIndex].paragraphs.splice(existingParagraphIndex, 1);
-      tabs[tabIndex].paragraphsLength = tabs[tabIndex].paragraphs.length;
+      tabIndex = tabs.findIndex(tab => tab.id === tabId);
+      if (tabIndex < 0) return state;
+
+      paragraphIndex = tabs[tabIndex].paragraphs.findIndex(
+        paragraph => paragraph.id === paragraphId,
+      );
+      if (paragraphIndex === -1) return state;
+
+      tabs[tabIndex].paragraphs.splice(paragraphIndex, 1);
 
       return {
         ...state,
@@ -73,17 +156,22 @@ export default (state = INITIAL_STATE, action) => {
 
     case 'UPDATE_PARAGRAPH':
       if (!documentHasFocus) return state;
-      const updatedParagraphs = tabs[tabIndex].paragraphs.map((paragraph, pIndex) => {
-        if (pIndex === paragraphIndex) {
-          return {
-            ...paragraph,
-            ...newParagraph,
-          };
-        }
-        return paragraph;
-      });
 
-      tabs[tabIndex].paragraphs = updatedParagraphs;
+      tabIndex = tabs.findIndex(tab => tab.id === tabId);
+      if (tabIndex < 0) return state;
+
+      paragraphIndex = tabs[tabIndex].paragraphs.findIndex(
+        paragraph => paragraph.id === paragraphId,
+      );
+      if (paragraphIndex === -1) return state;
+
+      const currentParagraph = tabs[tabIndex].paragraphs[paragraphIndex];
+
+      tabs[tabIndex].paragraphs[paragraphIndex] = {
+        ...currentParagraph,
+        ...newParagraph,
+      };
+
       return {
         ...state,
         tabs,
@@ -92,7 +180,12 @@ export default (state = INITIAL_STATE, action) => {
 
     case 'UPDATE_TAB_TITLE':
       if (!documentHasFocus) return state;
+
+      tabIndex = tabs.findIndex(tab => tab.id === tabId);
+      if (tabIndex < 0) return state;
+
       tabs[tabIndex].title = title;
+
       return {
         ...state,
         tabs,
@@ -101,7 +194,38 @@ export default (state = INITIAL_STATE, action) => {
 
     case 'UPDATE_TAB_WIDTH':
       if (!documentHasFocus) return state;
+
+      tabIndex = tabs.findIndex(tab => tab.id === tabId);
+      if (tabIndex < 0) return state;
+
       tabs[tabIndex].titleWidth = titleWidth;
+
+      return {
+        ...state,
+        tabs,
+        version: state.version + 1,
+      };
+
+    case 'CREATE_TAB':
+      if (!documentHasFocus) return state;
+
+      tabIndex = tabs.findIndex(tab => tab.id === tabId);
+      if (tabIndex < 0) return state;
+
+      tabs.splice(tabIndex + 1, 0, getBlankTab());
+      return {
+        ...state,
+        tabs,
+        version: state.version + 1,
+      };
+
+    case 'REMOVE_TAB':
+      if (!documentHasFocus) return state;
+
+      tabIndex = tabs.findIndex(tab => tab.id === tabId);
+      if (tabIndex < 0) return state;
+
+      tabs.splice(tabIndex, 1);
       return {
         ...state,
         tabs,
@@ -116,7 +240,11 @@ export default (state = INITIAL_STATE, action) => {
 
       if (storedState && state.version >= storedState.version) return state;
 
-      return typeof storedState.version === 'number' ? storedState : { ...storedState, version: 1 };
+      return storedState;
+
+    case 'RESET':
+      const newState = getInitialState();
+      return newState;
 
     default:
       return state;

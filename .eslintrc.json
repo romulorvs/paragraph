@@ -23,6 +23,9 @@
         "prettier"
     ],
     "rules": {
+        "no-unused-vars": "warn",
+        "no-unreachable": "warn",
+        "no-underscore-dangle": "off",
         "react/jsx-props-no-spreading": "off",
         "prettier/prettier": "error",
         "react/react-in-jsx-scope": "off",

@@ -32,6 +32,8 @@ button, input[type="submit"] {
   color: inherit;
   border: 0;
   background-color: unset;
+  cursor: pointer;
+  outline: none;
 }
 
 * {

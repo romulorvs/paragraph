@@ -1,43 +1,50 @@
+/* eslint-disable react/forbid-prop-types */
 import PropTypes from 'prop-types';
 import { useEffect, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import {
   addParagraph,
   removeParagraph,
   updateParagraph,
 } from '../../redux/actions/paragraphs-actions';
+import { configDebounce } from '../../utils';
 
 import './paragraph.css';
 
 const placeHolder = 'Escreva algo...';
+const debounceUpdateParagraph = configDebounce();
 
 export default function Paragraph({
-  text,
-  editingText,
-  coverText,
-  rows,
-  tabIndex,
+  paragraph,
+  tabId,
   paragraphIndex,
+  paragraphsLength,
+  previousParagraphId,
+  nextParagraphId,
+  previousParagraphText,
 }) {
   const dispatch = useDispatch();
 
-  const { tabs } = useSelector(state => state.storedParagraphs);
-  const beforeParagraphText = tabs[tabIndex].paragraphs[paragraphIndex - 1]?.editingText || '';
-  const { paragraphsLength } = tabs[tabIndex];
-
+  const [_paragraph, _setParagraph] = useState(paragraph);
   const [classes, setClasses] = useState('');
   const [containerclasses, setContainerClasses] = useState('');
   const [hasFocus, setHasFocus] = useState(false);
   const paragraphRef = useRef(null);
   const isKeyDown = useRef(false);
   const currentCursorPos = useRef(-1);
+  const moveToAddedParagraph = useRef(false);
+
+  useEffect(() => {
+    _setParagraph(paragraph);
+  }, [tabId]);
 
   const handleTextInput = e => {
     const newParagraph = {};
     let newEditingText;
-    if (coverText) {
-      newEditingText = e.target.value + editingText.substring(coverText.length);
+    if (_paragraph.coverText) {
+      newEditingText =
+        e.target.value + _paragraph.editingText.substring(_paragraph.coverText.length);
       currentCursorPos.current = e.target.selectionEnd;
     } else {
       newEditingText = e.target.value;
@@ -70,14 +77,22 @@ export default function Paragraph({
 
     newParagraph.rows = lineCount || 1;
 
-    if (coverText && newCoverText) {
+    if (_paragraph.coverText && newCoverText) {
       newParagraph.coverText = newCoverText;
-      dispatch(
-        updateParagraph({
-          tabIndex,
-          paragraphIndex,
-          newParagraph,
-        }),
+
+      _setParagraph({
+        ..._paragraph,
+        ...newParagraph,
+      });
+
+      debounceUpdateParagraph(() =>
+        dispatch(
+          updateParagraph({
+            tabId,
+            paragraphId: paragraph.id,
+            newParagraph,
+          }),
+        ),
       );
       return;
     }
@@ -85,12 +100,20 @@ export default function Paragraph({
     newParagraph.editingText = newEditingText;
     newParagraph.text = newText;
     newParagraph.coverText = newCoverText;
-    dispatch(
-      updateParagraph({
-        tabIndex,
-        paragraphIndex,
-        newParagraph,
-      }),
+
+    _setParagraph({
+      ..._paragraph,
+      ...newParagraph,
+    });
+
+    debounceUpdateParagraph(() =>
+      dispatch(
+        updateParagraph({
+          tabId,
+          paragraphId: paragraph.id,
+          newParagraph,
+        }),
+      ),
     );
   };
 
@@ -98,24 +121,24 @@ export default function Paragraph({
     let newClasses = '';
     let newContainerClasses = '';
 
-    if (editingText.startsWith('###')) newClasses += ' header3';
-    else if (editingText.startsWith('##')) newClasses += ' header2';
-    else if (editingText.startsWith('#')) newClasses += ' header1';
+    if (_paragraph.editingText.startsWith('###')) newClasses += ' header3';
+    else if (_paragraph.editingText.startsWith('##')) newClasses += ' header2';
+    else if (_paragraph.editingText.startsWith('#')) newClasses += ' header1';
 
-    if (editingText.startsWith('---')) {
+    if (_paragraph.editingText.startsWith('---')) {
       newContainerClasses += ' line_through';
     }
 
     setContainerClasses(newContainerClasses);
     setClasses(newClasses);
-  }, [editingText]);
+  }, [_paragraph.editingText]);
 
   useEffect(() => {
     if (paragraphRef.current) {
       paragraphRef.current.style.height = 'auto';
       paragraphRef.current.style.height = `${paragraphRef.current.scrollHeight}px`;
     }
-  }, [editingText, classes, containerclasses]);
+  }, [_paragraph.editingText, classes, containerclasses]);
 
   const handleKeyDown = e => {
     if (!hasFocus || isKeyDown.current) return;
@@ -135,36 +158,36 @@ export default function Paragraph({
       lastLinePos.end = value.length;
     }
 
-    const beforeParagraphElem = document.querySelector(
-      `textarea.paragraph[focusid="${paragraphIndex - 1}"]`,
+    const previousParagraphElem = document.querySelector(
+      `textarea.paragraph[paragraph_id="${previousParagraphId}"]`,
     );
     const nextParagrapElem = document.querySelector(
-      `textarea.paragraph[focusid="${paragraphIndex + 1}"]`,
+      `textarea.paragraph[paragraph_id="${nextParagraphId}"]`,
     );
 
     // when cursor is on first char
     if (currentCursorPos === 0) {
       // Backspace
       if (keyCode === 8) {
-        if (beforeParagraphElem && !beforeParagraphText.trim()) {
-          dispatch(removeParagraph({ tabIndex, paragraphIndex: paragraphIndex - 1 }));
-          beforeParagraphElem.focus();
+        if (previousParagraphElem && !previousParagraphText.trim()) {
+          e.preventDefault();
+          dispatch(removeParagraph({ tabId, paragraphId: previousParagraphId }));
           return;
         }
 
-        if (!value.trim() && beforeParagraphElem) {
+        if (!value.trim() && previousParagraphElem) {
           e.preventDefault();
-          dispatch(removeParagraph({ tabIndex, paragraphIndex }));
-          beforeParagraphElem.focus();
+          previousParagraphElem.focus();
+          dispatch(removeParagraph({ tabId, paragraphId: paragraph.id }));
           return;
         }
 
-        if (!value.trim() && !beforeParagraphElem && paragraphRef.current) {
+        if (!value.trim() && !previousParagraphElem && paragraphRef.current) {
           e.preventDefault();
-          if (paragraphsLength <= 2) {
-            paragraphRef.current.blur();
+          if (paragraphsLength > 2 && nextParagrapElem) {
+            nextParagrapElem.focus();
           }
-          dispatch(removeParagraph({ tabIndex, paragraphIndex }));
+          dispatch(removeParagraph({ tabId, paragraphId: paragraph.id }));
           return;
         }
       }
@@ -172,37 +195,44 @@ export default function Paragraph({
 
     // Delete
     if (keyCode === 46) {
-      if (!value && beforeParagraphElem) {
+      if (!value && previousParagraphElem) {
         e.preventDefault();
-        dispatch(removeParagraph({ tabIndex, paragraphIndex }));
+        dispatch(removeParagraph({ tabId, paragraphId: paragraph.id }));
         if (paragraphIndex >= paragraphsLength - 2) {
-          beforeParagraphElem.focus();
+          previousParagraphElem.focus();
+        } else if (nextParagrapElem) {
+          nextParagrapElem.focus();
         }
         return;
       }
 
-      if (!value && !beforeParagraphElem && paragraphRef.current) {
+      if (!value && !previousParagraphElem && paragraphRef.current) {
         e.preventDefault();
-        if (paragraphsLength <= 2) {
-          paragraphRef.current.blur();
+        if (paragraphsLength > 2 && nextParagrapElem) {
+          nextParagrapElem.focus();
         }
-        dispatch(removeParagraph({ tabIndex, paragraphIndex }));
+        dispatch(removeParagraph({ tabId, paragraphId: paragraph.id }));
         return;
       }
     }
 
     // Enter and Shift
-    if (keyCode === 13 && e.shiftKey) {
+    if (keyCode === 13 && e.shiftKey) return;
+
+    // Enter
+    if (keyCode === 13) {
       e.preventDefault();
       if (paragraphIndex + 1 < paragraphsLength - 1) {
         dispatch(
           addParagraph({
-            tabIndex,
-            after: paragraphIndex,
+            tabId,
+            afterId: paragraph.id,
           }),
         );
+        moveToAddedParagraph.current = true;
+      } else if (paragraphIndex === paragraphsLength - 2 && nextParagrapElem) {
+        nextParagrapElem.focus();
       }
-      if (nextParagrapElem) nextParagrapElem.focus();
 
       return;
     }
@@ -211,9 +241,9 @@ export default function Paragraph({
     if (currentCursorPos >= firstLinePos.start && currentCursorPos <= firstLinePos.end) {
       // Up Arrow
       if (keyCode === 38) {
-        if (beforeParagraphElem) {
+        if (previousParagraphElem) {
           e.preventDefault();
-          beforeParagraphElem.focus();
+          previousParagraphElem.focus();
           return;
         }
       }
@@ -231,12 +261,24 @@ export default function Paragraph({
     }
   };
 
+  useEffect(() => {
+    if (moveToAddedParagraph.current) {
+      const nextParagraphElem = document.querySelector(
+        `textarea.paragraph[paragraph_id="${nextParagraphId}"]`,
+      );
+
+      if (nextParagraphElem) nextParagraphElem.focus();
+
+      moveToAddedParagraph.current = false;
+    }
+  }, [paragraphsLength]);
+
   const onParagraphFocus = () => {
     setHasFocus(true);
     if (paragraphIndex === paragraphsLength - 1) {
       dispatch(
         addParagraph({
-          tabIndex,
+          tabId,
         }),
       );
     }
@@ -247,16 +289,23 @@ export default function Paragraph({
       paragraphRef.current.selectionEnd = currentCursorPos.current;
       currentCursorPos.current = -1;
     }
-  }, [editingText]);
+  }, [_paragraph.editingText]);
+
+  useEffect(() => {
+    return () => {
+      debounceUpdateParagraph.clear();
+    };
+  }, []);
 
   if (hasFocus) {
     return (
       <div className={`paragraph_container focusing${containerclasses}`}>
         <textarea
+          paragraph_id={paragraph.id}
           ref={paragraphRef}
           className={`paragraph focusing${classes}`}
-          value={coverText || editingText}
-          rows={rows}
+          value={_paragraph.coverText || _paragraph.editingText}
+          rows={1}
           onChange={handleTextInput}
           onBlur={() => setHasFocus(false)}
           placeholder={paragraphIndex === paragraphsLength - 1 ? placeHolder : undefined}
@@ -272,12 +321,12 @@ export default function Paragraph({
   return (
     <div className={`paragraph_container${containerclasses}`}>
       <textarea
-        focusid={paragraphIndex}
+        paragraph_id={paragraph.id}
         ref={paragraphRef}
         className={`paragraph${classes}`}
-        value={coverText || text}
+        value={_paragraph.coverText || _paragraph.text}
         readOnly
-        rows={rows}
+        rows={1}
         onFocus={onParagraphFocus}
         placeholder={paragraphIndex === paragraphsLength - 1 ? placeHolder : undefined}
       />
@@ -286,10 +335,11 @@ export default function Paragraph({
 }
 
 Paragraph.propTypes = {
-  text: PropTypes.string.isRequired,
-  editingText: PropTypes.string.isRequired,
-  coverText: PropTypes.string.isRequired,
-  rows: PropTypes.number.isRequired,
-  tabIndex: PropTypes.number.isRequired,
+  paragraph: PropTypes.object.isRequired,
+  tabId: PropTypes.string.isRequired,
   paragraphIndex: PropTypes.number.isRequired,
+  paragraphsLength: PropTypes.number.isRequired,
+  previousParagraphId: PropTypes.string.isRequired,
+  nextParagraphId: PropTypes.string.isRequired,
+  previousParagraphText: PropTypes.string.isRequired,
 };

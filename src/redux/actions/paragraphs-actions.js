@@ -1,49 +1,49 @@
-export function addParagraph({ tabIndex, after = null }) {
+export function addParagraph({ tabId, afterId = '' }) {
   return {
     type: 'ADD_PARAGRAPH',
     payload: {
-      tabIndex,
-      after,
+      tabId,
+      afterId,
     },
   };
 }
 
-export function removeParagraph({ tabIndex, paragraphIndex }) {
+export function removeParagraph({ tabId, paragraphId }) {
   return {
     type: 'REMOVE_PARAGRAPH',
     payload: {
-      tabIndex,
-      paragraphIndex,
+      tabId,
+      paragraphId,
     },
   };
 }
 
-export function updateParagraph({ tabIndex, paragraphIndex, newParagraph }) {
+export function updateParagraph({ tabId, paragraphId, newParagraph }) {
   return {
     type: 'UPDATE_PARAGRAPH',
     payload: {
-      tabIndex,
-      paragraphIndex,
+      tabId,
+      paragraphId,
       newParagraph,
     },
   };
 }
 
-export function updateTabTitle({ tabIndex, title }) {
+export function updateTabTitle({ tabId, title }) {
   return {
     type: 'UPDATE_TAB_TITLE',
     payload: {
-      tabIndex,
+      tabId,
       title,
     },
   };
 }
 
-export function updateTabWidth({ tabIndex, titleWidth }) {
+export function updateTabWidth({ tabId, titleWidth }) {
   return {
     type: 'UPDATE_TAB_WIDTH',
     payload: {
-      tabIndex,
+      tabId,
       titleWidth,
     },
   };
@@ -52,6 +52,23 @@ export function updateTabWidth({ tabIndex, titleWidth }) {
 export function updateState() {
   return {
     type: 'UPDATE_STATE',
-    payload: {},
+  };
+}
+
+export function createTab({ tabId = '' }) {
+  return {
+    type: 'CREATE_TAB',
+    payload: {
+      tabId,
+    },
+  };
+}
+
+export function removeTab({ tabId = '' }) {
+  return {
+    type: 'REMOVE_TAB',
+    payload: {
+      tabId,
+    },
   };
 }

@@ -1,0 +1,72 @@
+.tab-title{
+    border: 0;
+    font-size: 3.4rem;
+    font-weight: 700;
+    outline: none;
+    padding-left: 20px;
+    color: #b5b5b5;
+    margin-right: 40px;
+    transition: font-size 0.3s, color 0.3s;
+    background: none;
+}
+
+.tab-title.current{
+    color: black;
+}
+
+.tab-title:not(.current){
+    cursor: pointer;
+}
+
+.tab-title-wrapper{
+    display: flex;
+    position: relative;
+    justify-content: left;
+}
+
+.tab-title-wrapper.removing{
+    transition: max-width 0.3s;
+    overflow: hidden;
+}
+
+.tab-title-wrapper.removing .delete_button_wrapper{
+    display: none !important;
+}
+
+.delete_button_wrapper{
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 16px;
+}
+
+.tab-title-wrapper.current .delete_button_wrapper{
+    display: unset;
+}
+
+.tab-title-wrapper.current .delete-btn{
+    display: none;
+}
+
+.tab-title-wrapper.current .delete-btn.pending{
+    display: unset;
+}
+
+.tab-title-wrapper.current:hover .delete-btn{
+    display: unset;
+}
+
+.tab-title-wrapper.current:focus-within .delete-btn{
+    display: unset;
+}
+
+span.tab-title-ref{
+    position: fixed;
+    top: -100px;
+    left: 0;
+    user-select: none;
+    font-size: 3.4rem;
+    font-weight: 700;
+    padding-left: 20px;
+    white-space: pre;
+}
