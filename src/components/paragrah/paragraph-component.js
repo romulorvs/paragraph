@@ -1,4 +1,5 @@
 /* eslint-disable react/forbid-prop-types */
+import debounce from 'dbouncer';
 import PropTypes from 'prop-types';
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -8,7 +9,6 @@ import {
   removeParagraph,
   updateParagraph,
 } from '../../redux/actions/paragraphs-actions';
-import { configDebounce } from '../../utils';
 
 import './paragraph.css';
 
@@ -33,13 +33,11 @@ export default function Paragraph({
   const isKeyDown = useRef(false);
   const currentCursorPos = useRef(-1);
   const moveToAddedParagraph = useRef(false);
-  const debounceUpdateParagraph = useRef(configDebounce());
+  const debounceUpdateParagraph = useRef(debounce());
 
   // keeping local state synchronized with redux state when chrome tab is not active
   useEffect(() => {
-    console.log('passou 1');
     if (!document.hasFocus()) {
-      console.log('passou 2');
       _setParagraph(paragraph);
     }
   }, [paragraph]);
@@ -187,15 +185,6 @@ export default function Paragraph({
         if (!value.trim() && previousParagraphElem) {
           e.preventDefault();
           previousParagraphElem.focus();
-          dispatch(removeParagraph({ tabId, paragraphId: paragraph.id }));
-          return;
-        }
-
-        if (!value.trim() && !previousParagraphElem && paragraphRef.current) {
-          e.preventDefault();
-          if (paragraphsLength > 2 && nextParagrapElem) {
-            nextParagrapElem.focus();
-          }
           dispatch(removeParagraph({ tabId, paragraphId: paragraph.id }));
           return;
         }

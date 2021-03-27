@@ -1,7 +1,6 @@
 /* eslint-disable no-case-declarations */
+import ternary from 'ternary-function';
 import { v4 as uuid } from 'uuid';
-
-import { ifff } from '../../utils';
 
 function getBlankParagraph() {
   const BLANK_PARAGRAPH = {
@@ -96,6 +95,7 @@ function getInitialState() {
     ],
     version: 1,
   };
+  INITIAL_STATE.currentTabId = INITIAL_STATE.tabs[0].id;
 
   return INITIAL_STATE;
 }
@@ -178,6 +178,17 @@ export default (state = getInitialState(), action) => {
         version: state.version + 1,
       };
 
+    case 'SET_CURRENT_TAB_ID':
+      if (!documentHasFocus) return state;
+
+      tabIndex = tabs.findIndex(tab => tab.id === tabId);
+      if (tabIndex < 0) return state;
+
+      return {
+        ...state,
+        currentTabId: tabId,
+      };
+
     case 'UPDATE_TAB_TITLE':
       if (!documentHasFocus) return state;
 
@@ -209,13 +220,19 @@ export default (state = getInitialState(), action) => {
     case 'CREATE_TAB':
       if (!documentHasFocus) return state;
 
-      tabIndex = tabs.findIndex(tab => tab.id === tabId);
-      if (tabIndex < 0) return state;
+      const blankTab = getBlankTab();
 
-      tabs.splice(tabIndex + 1, 0, getBlankTab());
+      tabIndex = tabs.findIndex(tab => tab.id === tabId);
+      if (tabIndex < 0) {
+        tabs.push(blankTab);
+      } else {
+        tabs.splice(tabIndex + 1, 0, blankTab);
+      }
+
       return {
         ...state,
         tabs,
+        currentTabId: blankTab.id,
         version: state.version + 1,
       };
 
@@ -229,13 +246,15 @@ export default (state = getInitialState(), action) => {
       return {
         ...state,
         tabs,
+        currentTabId: !tabs.length ? '' : state.currentTabId,
         version: state.version + 1,
       };
 
     case 'UPDATE_STATE':
       if (documentHasFocus) return state;
-      const { storedParagraphs: storedState } = ifff(localStorage.getItem('@paragraph:data'), r =>
-        JSON.parse(r),
+      const { storedParagraphs: storedState } = ternary(
+        localStorage.getItem('@paragraph:data'),
+        r => JSON.parse(r),
       );
 
       if (storedState && state.version >= storedState.version) return state;

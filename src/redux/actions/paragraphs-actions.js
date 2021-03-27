@@ -55,7 +55,7 @@ export function updateState() {
   };
 }
 
-export function createTab({ tabId = '' }) {
+export function createTab({ tabId = '' } = {}) {
   return {
     type: 'CREATE_TAB',
     payload: {
@@ -67,6 +67,15 @@ export function createTab({ tabId = '' }) {
 export function removeTab({ tabId = '' }) {
   return {
     type: 'REMOVE_TAB',
+    payload: {
+      tabId,
+    },
+  };
+}
+
+export function setCurrentTabId({ tabId = '' }) {
+  return {
+    type: 'SET_CURRENT_TAB_ID',
     payload: {
       tabId,
     },

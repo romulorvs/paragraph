@@ -1,18 +1,25 @@
 /* eslint-disable react/forbid-prop-types */
+import debounce from 'dbouncer';
 import PropTypes from 'prop-types';
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import './tab.css';
-
-import { updateTabTitle, updateTabWidth, removeTab } from '../../redux/actions/paragraphs-actions';
-import { configDebounce } from '../../utils';
+import { ReactComponent as AddSVG } from '../../assets/add.svg';
+import {
+  setCurrentTabId,
+  updateTabTitle,
+  updateTabWidth,
+  removeTab,
+  createTab,
+} from '../../redux/actions/paragraphs-actions';
 import DeleteButton from '../delete-button';
+
+import './tab.css';
 
 const placeHolder = 'Título';
 const minTabWidth = 30; // pixels
 
-export default function Tab({ tab, isCurrentTab, onClick, nextTabId, previousTabId }) {
+export default function Tab({ tab, isCurrentTab, nextTabId, previousTabId }) {
   const dispatch = useDispatch();
 
   const [_title, _setTitle] = useState(tab.title);
@@ -20,8 +27,8 @@ export default function Tab({ tab, isCurrentTab, onClick, nextTabId, previousTab
 
   const tabTitleRef = useRef(null);
   const wrapperRef = useRef(null);
-  const debounceUpdateTabTitle = useRef(configDebounce());
-  const debounceUpdateTabWidth = useRef(configDebounce());
+  const debounceUpdateTabTitle = useRef(debounce());
+  const debounceUpdateTabWidth = useRef(debounce());
   const currentClassName = isCurrentTab ? 'current' : '';
 
   // keeping local state synchronized with redux state when chrome tab is not active
@@ -46,7 +53,15 @@ export default function Tab({ tab, isCurrentTab, onClick, nextTabId, previousTab
   }
 
   function handleClick(e) {
-    onClick(e, tab);
+    if (!isCurrentTab) {
+      e.preventDefault();
+
+      if ('activeElement' in document) {
+        document.activeElement.blur();
+      }
+
+      dispatch(setCurrentTabId({ tabId: tab.id }));
+    }
   }
 
   function handleDeleteTab() {
@@ -79,6 +94,10 @@ export default function Tab({ tab, isCurrentTab, onClick, nextTabId, previousTab
         );
       }, 300);
     }, 10);
+  }
+
+  function handleAddNewTab() {
+    dispatch(createTab({ tabId: tab.id }));
   }
 
   useEffect(() => {
@@ -126,6 +145,9 @@ export default function Tab({ tab, isCurrentTab, onClick, nextTabId, previousTab
           placeholder={placeHolder}
         />
         <DeleteButton className="delete_button_wrapper" onClick={handleDeleteTab} />
+        <button type="button" className="add-button" title="Adicionar" onClick={handleAddNewTab}>
+          <AddSVG />
+        </button>
       </div>
     </>
   );
@@ -133,13 +155,7 @@ export default function Tab({ tab, isCurrentTab, onClick, nextTabId, previousTab
 
 Tab.propTypes = {
   tab: PropTypes.object.isRequired,
-  isCurrentTab: PropTypes.bool,
-  onClick: PropTypes.func,
+  isCurrentTab: PropTypes.bool.isRequired,
   nextTabId: PropTypes.string.isRequired,
   previousTabId: PropTypes.string.isRequired,
-};
-
-Tab.defaultProps = {
-  isCurrentTab: false,
-  onClick: () => {},
 };

@@ -20,19 +20,22 @@
     box-shadow: -2px 0 0 0 rgb(226, 226, 226);
 }
 
+.paragraph.header1,
+.paragraph.header2,
+.paragraph.header3{
+    font-weight: 700;
+}
+
 .paragraph.header1{
     font-size: 3.2rem;
-    font-weight: 700;
 }
 
 .paragraph.header2{
     font-size: 2.7rem;
-    font-weight: 700;
 }
 
 .paragraph.header3{
     font-size: 2.2rem;
-    font-weight: 700;
 }
 
 .paragraph_container{
@@ -50,9 +53,13 @@
     left: 20px;
     right: 10px;
     height: 2px;
-    background-color: rgba(61, 61, 61, 0.2);
+    background-color: rgb(57, 69, 86)
 }
 
 .paragraph_container.line_through .paragraph:not(.focusing){
     color: transparent;
+}
+
+.paragraph::placeholder {
+    color: #657283;
 }

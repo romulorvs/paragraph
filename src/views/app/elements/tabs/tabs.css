@@ -9,7 +9,7 @@
 
 ul.tab-titles{
     display: flex;
-    align-items: fcenter;
+    align-items: center;
     height: 100%;
     position: absolute;
     transition: left 0.3s;

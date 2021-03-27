@@ -18,9 +18,6 @@
   height: 20px;
   border-radius: 30px;
 }
-.delete-btn:focus-visible svg{
-  box-shadow: 0 0 0 3px rgb(180, 180, 180);
-}
 .delete-btn:focus{
   fill: rgb(200, 200, 200);
 }
@@ -47,8 +44,4 @@
 }
 .delete-btn.pending:active, .delete-btn.pending:active:hover{
   fill: rgb(189, 43, 43);
-}
-
-.delete-btn.pending svg{
-  box-shadow: 0 0 0 3px rgb(255, 184, 184);
 }

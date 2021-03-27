@@ -4,10 +4,14 @@
     font-weight: 700;
     outline: none;
     padding-left: 20px;
-    color: #838383;
+    color: #657283;
     margin-right: 40px;
     transition: font-size 0.3s, color 0.3s;
     background: none;
+}
+
+.tab-title::placeholder {
+    color: #3d444f;
 }
 
 .tab-title.current{
@@ -22,6 +26,8 @@
     display: flex;
     position: relative;
     justify-content: left;
+    height: 100%;
+    align-items: center;
 }
 
 .tab-title-wrapper.removing{
@@ -37,7 +43,7 @@
     display: none;
     position: absolute;
     top: 0;
-    right: 16px;
+    right: 38px;
 }
 
 .tab-title-wrapper.current .delete_button_wrapper{
@@ -69,4 +75,43 @@ span.tab-title-ref{
     font-weight: 700;
     padding-left: 20px;
     white-space: pre;
+}
+
+.add-button{
+    width: 22px;
+    height: 22px;
+    opacity: 0;
+    fill: rgb(71, 86, 107);
+}
+
+.tab-titles-wrapper:hover .add-button{
+    opacity: unset;
+}
+
+.add-button:focus-visible{
+    opacity: unset;
+}
+
+.add-button:focus-visible, .add-button:hover{
+    fill: rgb(116, 136, 165);
+}
+.add-button:active{
+    fill: #589bf8;
+}
+
+.add-button.new-tab{
+    opacity: 1;
+    display: flex;
+    height: 100%;
+    align-items: center;
+    color: #516075;
+    font-size: 2.8rem;
+    font-weight: 700;
+    width: unset;
+    height: unset;
+}
+.add-button.new-tab svg{
+    min-height: 32px;
+    min-width: 32px;
+    margin-right: 8px;
 }

@@ -1,27 +1,22 @@
 /* eslint-disable react/forbid-prop-types */
-import PropTypes from 'prop-types';
 import { useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import ternary from 'ternary-function';
 
+import { ReactComponent as AddSVG } from '../../../../assets/add.svg';
 import Tab from '../../../../components/tab';
-import { ifff } from '../../../../utils';
+import { createTab } from '../../../../redux/actions/paragraphs-actions';
+
 import './tabs.css';
 
-const startingTab = 0;
-
-export default function Tabs({ tabs, onTabChange }) {
-  const [currentTabId, setCurrentTabId] = useState(tabs[startingTab] && tabs[startingTab].id);
+export default function Tabs() {
+  const dispatch = useDispatch();
+  const { currentTabId, tabs } = useSelector(state => state.storedParagraphs);
   const [leftTabPos, setLeftTabPos] = useState(0);
   const tabTitlesRef = useRef(null);
 
-  function handleTabClick(e, tab) {
-    if (tab.id !== currentTabId) {
-      e.preventDefault();
-
-      if ('activeElement' in document) document.activeElement.blur();
-
-      setCurrentTabId(tab.id);
-      onTabChange(tab);
-    }
+  function handleAddNewTab() {
+    dispatch(createTab());
   }
 
   useEffect(() => {
@@ -32,19 +27,7 @@ export default function Tabs({ tabs, onTabChange }) {
     if (tabWrapperElem) {
       setLeftTabPos(tabWrapperElem.offsetLeft);
     }
-  }, [currentTabId, tabs]);
-
-  useEffect(() => {
-    if (tabs.length) onTabChange(tabs[startingTab] || null);
-  }, []);
-
-  useEffect(() => {
-    if (!tabs.length) onTabChange(null);
-  }, [tabs]);
-
-  if (!tabs.length) {
-    return <div>Começar</div>;
-  }
+  }, [currentTabId]);
 
   return (
     <>
@@ -57,26 +40,31 @@ export default function Tabs({ tabs, onTabChange }) {
           }}
         >
           {tabs.map((tab, index) => {
-            const nextTabId = ifff(tabs[index + 1], tab => tab.id, '');
-            const previousTabId = ifff(tabs[index - 1], tab => tab.id, '');
+            const nextTabId = ternary(tabs[index + 1], tab => tab.id, '');
+            const previousTabId = ternary(tabs[index - 1], tab => tab.id, '');
 
             return (
               <Tab
                 key={tab.id}
                 tab={tab}
-                onClick={handleTabClick}
                 nextTabId={nextTabId}
                 previousTabId={previousTabId}
                 isCurrentTab={currentTabId === tab.id}
               />
             );
           })}
+          {!tabs.length && (
+            <button
+              type="button"
+              className="add-button new-tab"
+              title="Adicionar"
+              onClick={handleAddNewTab}
+            >
+              <AddSVG /> Novo
+            </button>
+          )}
         </ul>
       </div>
     </>
   );
 }
-Tabs.propTypes = {
-  tabs: PropTypes.array.isRequired,
-  onTabChange: PropTypes.func.isRequired,
-};
