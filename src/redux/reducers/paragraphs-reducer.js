@@ -16,7 +16,7 @@ function getBlankTab() {
   const BLANK_TAB = {
     id: uuid(),
     title: 'novo...',
-    titleWidth: 142,
+    titleWidth: 124,
     paragraphs: [getBlankParagraph()],
   };
   return BLANK_TAB;
